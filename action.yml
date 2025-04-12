@@ -23,7 +23,7 @@ runs:
     - name: Set up Go
       uses: actions/setup-go@v5
       with:
-          go-version-file: ./go.mod
+          go-version-file: ${{ inputs.go-version-file }}
 
     - name: Set up Protobuf
       uses: arduino/setup-protoc@v3
@@ -35,11 +35,13 @@ runs:
           go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
     - name: Refresh Protobuf definitions
+      if: ${{ inputs.generate-protobuf-bindings == 'true' }}
       shell: bash
-      working-directory: internal/pb
+      working-directory: ${{ inputs.protobuf-directory }}
       run: protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative --proto_path=. ./*.proto
 
     - name: Generate code
+      if: ${{ inputs.generate-code == 'true' }}
       shell: bash
       run: go generate -x ./...
 
