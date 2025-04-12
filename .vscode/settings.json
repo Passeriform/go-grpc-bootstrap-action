@@ -1,5 +1,8 @@
 {
     "cSpell.words": [
         "protoc"
-    ]
+    ],
+    "yaml.schemas": {
+        "https://json.schemastore.org/github-action.json": "file:///d%3A/personal/go-grpc-bootstrap-action/action.yml"
+    }
 }
