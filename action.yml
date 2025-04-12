@@ -1,0 +1,48 @@
+name: Bootstrap Go and gRPC
+description: Setup a Go and gRPC environment with code and Protobuf bindings generation.
+inputs:
+  go-version-file:
+    description: Path to Go version (mod) file
+    required: false
+    default: ./go.mod
+  protobuf-directory:
+    description: Path to Protobuf files
+    required: false
+    default: ./
+  generate-protobuf-bindings:
+    description: When set to true, generates Protobuf-Go bindings
+    required: false
+    default: 'true'
+  generate-code:
+    description: When set to true, runs go generate
+    required: false
+    default: 'false'
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+          go-version-file: ./go.mod
+
+    - name: Set up Protobuf
+      uses: arduino/setup-protoc@v3
+
+    - name: Install Protobuf-Go bindings generator
+      shell: bash
+      run: |
+          go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
+          go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+
+    - name: Refresh Protobuf definitions
+      shell: bash
+      working-directory: internal/pb
+      run: protoc --go_out=. --go_opt=paths=source_relative --go-grpc_out=. --go-grpc_opt=paths=source_relative --proto_path=. ./*.proto
+
+    - name: Generate code
+      shell: bash
+      run: go generate -x ./...
+
+    - name: Install dependencies
+      shell: bash
+      run: go mod tidy
